@@ -12,11 +12,20 @@ type AppliedFlags = list[str]
 type CommandPath = tuple[str, ...]
 type ArgumentValidator = Callable[[str], tuple[bool, ArgumentError | None]]
 type CommandHandler = Callable[[ArgDict, AppliedFlags], CmdExecutionResult]
+type ArgumentSanitizer = Callable[[str], str]
+type ArgumentConverter = Callable[[str], Any]
 
 
 # ---------------------------------------------------------------------------
 # Argument definitions and execution results
 # ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ValueSchema:
+    validator: ArgumentValidator
+    sanitizer: Callable[[str], str] = lambda val: val
+    converter: Callable[[str], Any] = lambda val: val
 
 
 @dataclass(frozen=True)
@@ -29,7 +38,7 @@ class ArgumentError:
 class NamedArgument:
     name: str
     required: bool
-    validator: ArgumentValidator
+    schema: ValueSchema
 
     def __post_init__(self) -> None:
         if not self.name or self.name.isdigit():
@@ -39,7 +48,7 @@ class NamedArgument:
 @dataclass(frozen=True)
 class PositionalArgument:
     position: int
-    validator: ArgumentValidator
+    schema: ValueSchema
 
     def __post_init__(self) -> None:
         if self.position < 0:
@@ -156,13 +165,13 @@ class Command:
     def is_allowed_arg_position(self, position: int) -> bool:
         return self.get_positional_argument(position) is not None
 
-    def get_validator_for_argument(self, arg_name: str) -> ArgumentValidator | None:
+    def get_validator_for_argument(self, arg_name: str) -> ValueSchema | None:
         argument = self.get_named_argument(arg_name)
-        return argument.validator if argument else None
+        return argument.schema if argument else None
 
-    def get_validator_for_pos_argument(self, position: int) -> ArgumentValidator | None:
+    def get_validator_for_pos_argument(self, position: int) -> ValueSchema | None:
         argument = self.get_positional_argument(position)
-        return argument.validator if argument else None
+        return argument.schema if argument else None
 
 
 # ---------------------------------------------------------------------------

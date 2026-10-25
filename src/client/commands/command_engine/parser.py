@@ -1,6 +1,6 @@
 import re
 from collections.abc import Callable
-from definitions import CommandPath, CommandToken, CommandTokenType
+from .definitions import CommandPath, CommandToken, CommandTokenType
 
 # ---------------------------------------------------------------------------
 # Tokenisation and command parsing

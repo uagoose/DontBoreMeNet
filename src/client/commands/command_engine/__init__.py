@@ -1,8 +1,8 @@
 from collections.abc import Mapping
 from types import MappingProxyType
 from uuid import uuid4
-from definitions import *
-from parser import CommandParser
+from .definitions import *
+from .parser import CommandParser
 
 # ---------------------------------------------------------------------------
 # Command packs
@@ -255,7 +255,9 @@ class CommandManager:
                     f"{display_path}"
                 )
 
-            valid, error = argument.validator(value)
+            schema = argument.schema
+            sanitized = schema.sanitizer(value)
+            valid, error = schema.validator(sanitized)
             if not valid:
                 if error is None:
                     return self.__error(
@@ -266,6 +268,9 @@ class CommandManager:
                     f"Help: {error.help}"
                 )
 
+            new_value = schema.converter(sanitized)
+            named_values[name] = new_value
+
         for position, value in enumerate(positional_values):
             argument = command.get_positional_argument(position)
             if argument is None:
@@ -274,7 +279,9 @@ class CommandManager:
                     f"{display_path}"
                 )
 
-            valid, error = argument.validator(value)
+            schema = argument.schema
+            sanitized = schema.sanitizer(value)
+            valid, error = schema.validator(sanitized)
             if not valid:
                 if error is None:
                     return self.__error(
@@ -285,6 +292,9 @@ class CommandManager:
                     f"Argument error at position {position}: {error.message} | "
                     f"Help: {error.help}"
                 )
+
+            new_value = schema.converter(sanitized)
+            positional_values[position] = new_value
 
         for argument in command.arguments:
             if isinstance(argument, NamedArgument):
