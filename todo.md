@@ -1,0 +1,3 @@
+- implement logger
+- divide commands.py into isolated modules.
+- document commands.py
