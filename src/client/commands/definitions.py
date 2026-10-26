@@ -11,7 +11,7 @@ type ArgDict = dict[str, str]
 type AppliedFlags = list[str]
 type CommandPath = tuple[str, ...]
 type ArgumentValidator = Callable[[str], tuple[bool, ArgumentError | None]]
-type CommandHandler = Callable[[ArgDict, AppliedFlags], CmdExecutionResult]
+type CommandHandler = Callable[[ArgDict, AppliedFlags], CommandExecutionResult]
 type ArgumentSanitizer = Callable[[str], str]
 type ArgumentConverter = Callable[[str], Any]
 
@@ -55,23 +55,23 @@ class PositionalArgument:
             raise ValueError("Positional argument index cannot be negative.")
 
 
-class CmdExecutionCode(Enum):
+class CommandExecutionCode(Enum):
     Error = auto()
     Success = auto()
 
 
 @dataclass(frozen=True)
-class CmdExecutionResult:
-    cmd_execution_code: CmdExecutionCode
+class CommandExecutionResult:
+    cmd_execution_code: CommandExecutionCode
     value: Any | None = None
 
     @classmethod
-    def success(cls, value: Any | None = None) -> CmdExecutionResult:
-        return cls(CmdExecutionCode.Success, value)
+    def success(cls, value: Any | None = None) -> CommandExecutionResult:
+        return cls(CommandExecutionCode.Success, value)
 
     @classmethod
-    def error(cls, message: str) -> CmdExecutionResult:
-        return cls(CmdExecutionCode.Error, message)
+    def error(cls, message: str) -> CommandExecutionResult:
+        return cls(CommandExecutionCode.Error, message)
 
 
 # ---------------------------------------------------------------------------

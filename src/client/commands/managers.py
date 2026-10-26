@@ -2,7 +2,7 @@ from collections.abc import Mapping
 from types import MappingProxyType
 from uuid import uuid4
 from .definitions import *
-from .parser import CommandParser
+from .__parser import CommandParser
 
 # ---------------------------------------------------------------------------
 # Command packs
@@ -175,12 +175,12 @@ class CommandManager:
         return self.main_pack.exists(cmd_path)
 
     @staticmethod
-    def __error(message: str) -> CmdExecutionResult:
-        return CmdExecutionResult.error(message)
+    def __error(message: str) -> CommandExecutionResult:
+        return CommandExecutionResult.error(message)
 
     def __collect_arguments(
         self, tokens: list[CommandToken], command_path: CommandPath
-    ) -> tuple[list[str], ArgDict, AppliedFlags] | CmdExecutionResult:
+    ) -> tuple[list[str], ArgDict, AppliedFlags] | CommandExecutionResult:
         positional_values: list[str] = []
         named_values: ArgDict = {}
         flags: AppliedFlags = []
@@ -240,7 +240,7 @@ class CommandManager:
         named_values: ArgDict,
         flags: AppliedFlags,
         display_path: str,
-    ) -> CmdExecutionResult | None:
+    ) -> CommandExecutionResult | None:
         for flag in flags:
             if not command.is_allowed_flag(flag):
                 return self.__error(
@@ -311,7 +311,7 @@ class CommandManager:
 
         return None
 
-    def try_execute(self, raw_input: str) -> CmdExecutionResult:
+    def try_execute(self, raw_input: str) -> CommandExecutionResult:
         tokens = self.__parser.parse_raw(raw_input)
 
         command_path: CommandPath = tuple(
@@ -328,7 +328,7 @@ class CommandManager:
             )
 
         collected = self.__collect_arguments(tokens, command_path)
-        if isinstance(collected, CmdExecutionResult):
+        if isinstance(collected, CommandExecutionResult):
             return collected
 
         positional_values, named_values, flags = collected

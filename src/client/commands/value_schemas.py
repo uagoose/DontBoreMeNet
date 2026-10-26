@@ -1,4 +1,4 @@
-from .command_engine.definitions import *
+from .definitions import *
 
 
 class SanitizerTemplates:
